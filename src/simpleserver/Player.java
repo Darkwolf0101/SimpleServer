@@ -70,7 +70,6 @@ public class Player {
   // player is not authenticated with minecraft.net:
   private boolean guest = false;
   private boolean usedAuthenticator = false;
-  private boolean localChat = false;
   private int blocksPlaced = 0;
   private int blocksDestroyed = 0;
   private Player reply = null;
@@ -249,11 +248,14 @@ public class Player {
     messagePrototype = message;
   }
 
+  public String getChatRoom() {
+    return messagePrototype.toString();
+  }
+
   public void sendMessage(String message) {
     AbstractMessage newMessage;
     try {
-      newMessage = messagePrototype.clone();
-      newMessage.setMessage(message);
+      newMessage = messagePrototype.clone(message);
       sendMessage(newMessage);
     } catch (CloneNotSupportedException e) {
       e.printStackTrace();
@@ -431,14 +433,6 @@ public class Player {
     return position.pitch;
   }
 
-  public void setLocalChat(boolean mode) {
-    localChat = mode;
-  }
-
-  public boolean localChat() {
-    return localChat;
-  }
-
   public boolean parseCommand(String message) {
     if (closed) {
       return true;
@@ -588,7 +582,7 @@ public class Player {
       server.data.save();
 
       server.playerList.removePlayer(this);
-      name = null;
+      name = renameName = null;
     }
   }
 
