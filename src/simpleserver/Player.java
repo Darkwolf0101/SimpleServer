@@ -31,12 +31,15 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import simpleserver.Coordinate.Dimension;
+import simpleserver.bot.BotController.ConnectException;
 import simpleserver.bot.Giver;
 import simpleserver.bot.Teleporter;
-import simpleserver.bot.BotController.ConnectException;
 import simpleserver.command.ExternalCommand;
 import simpleserver.command.PlayerCommand;
 import simpleserver.config.data.Stats.StatField;
+import simpleserver.message.AbstractMessage;
+import simpleserver.message.GlobalMessage;
+import simpleserver.message.Message;
 import simpleserver.stream.StreamTunnel;
 
 public class Player {
@@ -73,6 +76,7 @@ public class Player {
   private Player reply = null;
   private String lastCommand = "";
 
+  private AbstractMessage messagePrototype;
   private Queue<String> messages = new ConcurrentLinkedQueue<String>();
   private Queue<PlayerVisitRequest> visitreqs = new ConcurrentLinkedQueue<PlayerVisitRequest>();
 
@@ -92,6 +96,7 @@ public class Player {
     connected = System.currentTimeMillis();
     position = new Position();
     server = parent;
+    messagePrototype = new GlobalMessage(this);
     extsocket = inc;
     if (server.isRobot(getIPAddress())) {
       System.out.println("[SimpleServer] Robot Heartbeat: " + getIPAddress()
@@ -238,6 +243,26 @@ public class Player {
 
   public Server getServer() {
     return server;
+  }
+
+  public void setMessagePrototype(AbstractMessage message) {
+    messagePrototype = message;
+  }
+
+  public void sendMessage(String message) {
+    AbstractMessage newMessage;
+    try {
+      newMessage = messagePrototype.clone();
+      newMessage.setMessage(message);
+      sendMessage(newMessage);
+    } catch (CloneNotSupportedException e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  public void sendMessage(Message message) {
+    server.getMessager().propagate(message);
   }
 
   public boolean hasMessages() {
