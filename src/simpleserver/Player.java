@@ -37,9 +37,9 @@ import simpleserver.bot.Teleporter;
 import simpleserver.command.ExternalCommand;
 import simpleserver.command.PlayerCommand;
 import simpleserver.config.data.Stats.StatField;
-import simpleserver.message.AbstractMessage;
-import simpleserver.message.GlobalMessage;
-import simpleserver.message.Message;
+import simpleserver.message.AbstractChat;
+import simpleserver.message.Chat;
+import simpleserver.message.GlobalChat;
 import simpleserver.stream.StreamTunnel;
 
 public class Player {
@@ -75,7 +75,7 @@ public class Player {
   private Player reply = null;
   private String lastCommand = "";
 
-  private AbstractMessage messageType;
+  private AbstractChat chatType;
   private Queue<String> messages = new ConcurrentLinkedQueue<String>();
   private Queue<PlayerVisitRequest> visitreqs = new ConcurrentLinkedQueue<PlayerVisitRequest>();
 
@@ -95,7 +95,7 @@ public class Player {
     connected = System.currentTimeMillis();
     position = new Position();
     server = parent;
-    messageType = new GlobalMessage(this);
+    chatType = new GlobalChat(this);
     extsocket = inc;
     if (server.isRobot(getIPAddress())) {
       System.out.println("[SimpleServer] Robot Heartbeat: " + getIPAddress()
@@ -244,19 +244,19 @@ public class Player {
     return server;
   }
 
-  public void setMessagePrototype(AbstractMessage message) {
-    messageType = message;
+  public void setChat(AbstractChat chat) {
+    chatType = chat;
   }
 
   public String getChatRoom() {
-    return messageType.toString();
+    return chatType.toString();
   }
 
   public void sendMessage(String message) {
-    sendMessage(messageType, message);
+    sendMessage(chatType, message);
   }
 
-  public void sendMessage(Message messageType, String message) {
+  public void sendMessage(Chat messageType, String message) {
     server.getMessager().propagate(messageType, message);
   }
 
